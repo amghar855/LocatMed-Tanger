@@ -5,6 +5,10 @@ import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
+if (!process.env.NEXTAUTH_SECRET && !process.env.AUTH_SECRET) {
+  throw new Error("NEXTAUTH_SECRET is not set");
+}
+
 function resolveAuthSecret() {
   const envSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
   if (envSecret) return envSecret;
