@@ -1,3 +1,4 @@
+// Trigger rebuild - cleanup duplicate folder
 import type { NextConfig } from "next";
 import withPWAInit from "next-pwa";
 import runtimeCaching from "next-pwa/cache.js";
