@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LOCATOMED - Numériser une ordonnance</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#a43a3a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#f8f9fa",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-variant": "#e1e3e4",
+                        "on-secondary": "#ffffff",
+                        "outline-variant": "#bbcabf",
+                        "on-surface-variant": "#3c4a42",
+                        "secondary-fixed-dim": "#9ed2b5",
+                        "inverse-surface": "#2e3132",
+                        "on-tertiary-fixed": "#410005",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9fa",
+                        "surface-dim": "#d9dadb",
+                        "primary": "#006c49",
+                        "on-background": "#191c1d",
+                        "outline": "#6c7a71",
+                        "on-tertiary-container": "#711419",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#b7ebce",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#002113",
+                        "surface-container-high": "#e7e8e9",
+                        "surface-tint": "#006c49",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#f0f1f2",
+                        "tertiary-fixed-dim": "#ffb3af",
+                        "secondary-fixed": "#baeed1",
+                        "on-surface": "#191c1d",
+                        "primary-fixed": "#6ffbbe",
+                        "on-primary-container": "#00422b",
+                        "on-secondary-fixed-variant": "#1e4f3a",
+                        "on-tertiary-fixed-variant": "#842225",
+                        "surface-bright": "#f8f9fa",
+                        "on-primary-fixed": "#002113",
+                        "tertiary-container": "#fc7c78",
+                        "tertiary-fixed": "#ffdad7",
+                        "inverse-primary": "#4edea3",
+                        "on-primary-fixed-variant": "#005236",
+                        "secondary": "#376850",
+                        "surface-container-low": "#f3f4f5",
+                        "surface-container": "#edeeef",
+                        "on-secondary-container": "#3c6c54",
+                        "primary-container": "#10b981",
+                        "primary-fixed-dim": "#4edea3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-white/80 dark:bg-teal-950/80 backdrop-blur-md text-teal-900 dark:text-teal-50 docked full-width top-0 z-50 shadow-sm dark:shadow-none flex justify-between items-center px-6 py-4 w-full sticky">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border border-outline-variant/10">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a professional man in a clean white medical environment with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWvWh6QI8hRyvBtpq3Wlq_8UI29ZQgBLcvv0bGRpLEvU3g7TVWHVodUVpRLGjnJrqzxVuBt-pcWwvwueuRfH_bdjqyUQqPsjl5lzNBc-wNIdQ9IjFu1icZhq2gPG9pNMs0fjoAHqQ7AYm2ODl1cN5hu34UnZSIy8Gpk58LDJpJ103fA7L9FkyNkPgPeont2d5uI5XKC7kv0BKfpd-E6IXlcFkVtb8NYNz95y-ECXFPr0pOzupZI30q67WLGw1iptQcfR_DSUpQqDA"/>
+</div>
+<span class="text-2xl font-black text-teal-800 dark:text-teal-400 tracking-tighter">LOCATOMED</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined p-2 rounded-full hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors">notifications</button>
+</div>
+</header>
+<main class="max-w-xl mx-auto px-6 pt-10 space-y-12">
+<!-- Header Section -->
+<div class="space-y-2">
+<span class="text-xs font-bold tracking-[0.2em] text-primary uppercase">Pharmacie Digitalisée</span>
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface">Numériser une ordonnance</h1>
+<p class="text-on-surface-variant leading-relaxed max-w-sm">
+                Simplifiez votre parcours de soin en numérisant vos documents médicaux en quelques secondes.
+            </p>
+</div>
+<!-- Upload Zone -->
+<section class="relative">
+<div class="absolute -top-12 -right-12 w-48 h-48 bg-primary-fixed opacity-20 blur-[80px] rounded-full pointer-events-none"></div>
+<div class="relative bg-surface-container-lowest rounded-xl p-10 border-2 border-dashed border-outline-variant/30 flex flex-col items-center justify-center text-center space-y-6 transition-all hover:border-primary/40 group">
+<div class="w-20 h-20 bg-secondary-container/30 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings: 'FILL' 1;">document_scanner</span>
+</div>
+<div class="space-y-1">
+<h3 class="text-xl font-bold text-on-surface">Déposez votre ordonnance</h3>
+<p class="text-sm text-on-surface-variant">Glissez-déposez votre fichier ici ou utilisez les boutons ci-dessous</p>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="grid grid-cols-2 gap-4 mt-6">
+<button class="flex items-center justify-center gap-2 bg-secondary-container text-on-secondary-container py-4 rounded-xl font-semibold hover:scale-[1.02] transition-transform active:scale-95">
+<span class="material-symbols-outlined">photo_camera</span>
+                    Prendre une photo
+                </button>
+<button class="flex items-center justify-center gap-2 bg-surface-container-low text-on-surface py-4 rounded-xl font-semibold border border-outline-variant/10 hover:scale-[1.02] transition-transform active:scale-95">
+<span class="material-symbols-outlined">upload_file</span>
+                    Importer un fichier
+                </button>
+</div>
+</section>
+<!-- Scanned Results Section -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="text-xl font-bold text-on-surface">Résultats de l'analyse</h2>
+<span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full">Automatique</span>
+</div>
+<div class="space-y-4">
+<!-- Medication Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl flex items-center gap-5 transition-all hover:bg-white">
+<div class="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-2xl">medication</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface text-lg">Amoxicilline</h4>
+<p class="text-sm text-on-surface-variant">500 mg • 3 fois par jour</p>
+</div>
+<div class="text-primary-container">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Medication Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl flex items-center gap-5 transition-all hover:bg-white">
+<div class="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-2xl">pill</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface text-lg">Paracétamol</h4>
+<p class="text-sm text-on-surface-variant">1000 mg • Si douleur</p>
+</div>
+<div class="text-primary-container">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Primary Action -->
+<section class="pt-4">
+<button class="w-full py-5 bg-primary text-on-primary rounded-xl font-bold text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95 flex items-center justify-center gap-3">
+<span class="material-symbols-outlined">local_pharmacy</span>
+                Trouver une pharmacie
+            </button>
+<p class="text-center text-xs text-on-surface-variant mt-4 px-8 italic">
+                Vos données sont cryptées et accessibles uniquement par vous et votre professionnel de santé.
+            </p>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-3 pb-8 bg-white/90 dark:bg-teal-950/90 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)] rounded-t-[2rem]">
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1.5 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-transform duration-300">
+<span class="material-symbols-outlined">home</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1.5 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-transform duration-300">
+<span class="material-symbols-outlined">search</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Explore</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1.5 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-transform duration-300">
+<span class="material-symbols-outlined">event_note</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Bookings</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1.5 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-transform duration-300">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Saved</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-teal-100 dark:bg-teal-800/40 text-teal-700 dark:text-teal-300 rounded-2xl px-4 py-1.5 scale-110 active:scale-90 transition-transform duration-300">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">document_scanner</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Scan</span>
+</div>
+</nav>
+</body></html>

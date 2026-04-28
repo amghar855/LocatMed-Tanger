@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#a43a3a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#f8f9fa",
+                    "error": "#ba1a1a",
+                    "surface-container-highest": "#e1e3e4",
+                    "surface-variant": "#e1e3e4",
+                    "on-secondary": "#ffffff",
+                    "outline-variant": "#bbcabf",
+                    "on-surface-variant": "#3c4a42",
+                    "secondary-fixed-dim": "#9ed2b5",
+                    "inverse-surface": "#2e3132",
+                    "on-tertiary-fixed": "#410005",
+                    "error-container": "#ffdad6",
+                    "background": "#f8f9fa",
+                    "surface-dim": "#d9dadb",
+                    "primary": "#006c49",
+                    "on-background": "#191c1d",
+                    "outline": "#6c7a71",
+                    "on-tertiary-container": "#711419",
+                    "on-error": "#ffffff",
+                    "secondary-container": "#b7ebce",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed": "#002113",
+                    "surface-container-high": "#e7e8e9",
+                    "surface-tint": "#006c49",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "inverse-on-surface": "#f0f1f2",
+                    "tertiary-fixed-dim": "#ffb3af",
+                    "secondary-fixed": "#baeed1",
+                    "on-surface": "#191c1d",
+                    "primary-fixed": "#6ffbbe",
+                    "on-primary-container": "#00422b",
+                    "on-secondary-fixed-variant": "#1e4f3a",
+                    "on-tertiary-fixed-variant": "#842225",
+                    "surface-bright": "#f8f9fa",
+                    "on-primary-fixed": "#002113",
+                    "tertiary-container": "#fc7c78",
+                    "tertiary-fixed": "#ffdad7",
+                    "inverse-primary": "#4edea3",
+                    "on-primary-fixed-variant": "#005236",
+                    "secondary": "#376850",
+                    "surface-container-low": "#f3f4f5",
+                    "surface-container": "#edeeef",
+                    "on-secondary-container": "#3c6c54",
+                    "primary-container": "#10b981",
+                    "primary-fixed-dim": "#4edea3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sanctuary-blur {
+            filter: blur(80px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body text-on-surface min-h-screen flex flex-col">
+<!-- TopAppBar Navigation Shell -->
+<header class="bg-white/80 dark:bg-teal-950/80 backdrop-blur-md shadow-sm dark:shadow-none flex justify-between items-center px-6 py-4 w-full docked full-width top-0 z-50">
+<div class="flex items-center gap-3">
+<span class="text-2xl font-black text-teal-800 dark:text-teal-400 tracking-tighter">LOCATOMED</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-teal-900 dark:text-teal-50" data-icon="notifications">notifications</span>
+</button>
+<img alt="User Profile" class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="Close-up portrait of a professional man in a bright, modern clinical setting with soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLhmXr9h_-tuY-7NXc6XdKQyijqpv0_v__aQVyBB7MQvXZVsTLCdrNvNVAOE8nyP2CupWfgGqsqGphZ8Qjyn_VMxUyAV8sGSykCIXauna36qY26P4WB-ri4qCgXxAP3MtGeH_Qp1lO1W6w1hmR1l180yelDpJ5j4-xn18rFuJee5taJf2bUJSL-C1bFAe3Xs0kfjRbcVIZ98RBriN_qokj-64yfLWagBILuimZeGWqQvtJmEWJqQe2x04i5C_CjUxuwYOQtOJAvh4"/>
+</div>
+</header>
+<!-- Sanctuary Decorative Background -->
+<div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+<div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-fixed opacity-10 rounded-full sanctuary-blur"></div>
+<div class="absolute top-1/2 -right-24 w-80 h-80 bg-secondary-fixed opacity-10 rounded-full sanctuary-blur"></div>
+</div>
+<!-- Main Content Canvas -->
+<main class="flex-1 container mx-auto max-w-3xl flex flex-col pt-24 pb-32 px-4 relative z-10">
+<!-- Disclaimer Card -->
+<div class="mb-8 bg-tertiary-fixed border-none rounded-xl p-5 flex items-start gap-4 shadow-sm">
+<span class="material-symbols-outlined text-on-tertiary-container flex-shrink-0" data-icon="emergency_home">emergency_home</span>
+<div>
+<p class="text-on-tertiary-container font-medium text-sm leading-relaxed">
+                    Important: Cet assistant ne remplace pas une consultation médicale. En cas d'urgence, contactez le 150.
+                </p>
+</div>
+</div>
+<!-- Chat Conversation Flow -->
+<div class="flex flex-col gap-6 flex-1">
+<!-- Date/Context Marker -->
+<div class="flex justify-center">
+<span class="bg-surface-container-low text-on-surface-variant text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full">Aujourd'hui</span>
+</div>
+<!-- Bot Message -->
+<div class="flex items-end gap-3 max-w-[85%]">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-primary text-sm" data-icon="smart_toy" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div class="bg-surface-container-lowest text-on-surface p-4 rounded-2xl rounded-bl-none shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-outline-variant/10">
+<p class="text-sm leading-relaxed">Bonjour ! Je suis l'assistant LOCATOMED. Comment puis-je vous aider aujourd'hui ? Vous pouvez me poser des questions sur vos symptômes, vos rendez-vous ou vos conseils de santé.</p>
+<div class="mt-1">
+<span class="text-[10px] text-on-surface-variant/60 font-medium uppercase tracking-tight">LOCATOMED Assistant • 10:42</span>
+</div>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex flex-col items-end gap-1 ml-auto max-w-[85%]">
+<div class="bg-primary text-on-primary p-4 rounded-2xl rounded-br-none shadow-md">
+<p class="text-sm leading-relaxed">J'ai des maux de tête fréquents depuis trois jours, surtout le soir.</p>
+</div>
+<span class="text-[10px] text-on-surface-variant/60 font-medium uppercase tracking-tight mr-1">10:45</span>
+</div>
+<!-- Bot Message -->
+<div class="flex items-end gap-3 max-w-[85%]">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-primary text-sm" data-icon="smart_toy" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div class="bg-surface-container-lowest text-on-surface p-4 rounded-2xl rounded-bl-none shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-outline-variant/10">
+<p class="text-sm leading-relaxed mb-3">Je comprends. Pour m'aider à mieux vous orienter, pourriez-vous préciser si ces douleurs sont accompagnées d'autres symptômes comme une sensibilité à la lumière ou des nausées ?</p>
+<div class="flex flex-wrap gap-2">
+<button class="bg-surface-container-low hover:bg-surface-container-high transition-colors text-xs font-semibold px-4 py-2 rounded-full border border-outline-variant/20">Oui, nausées</button>
+<button class="bg-surface-container-low hover:bg-surface-container-high transition-colors text-xs font-semibold px-4 py-2 rounded-full border border-outline-variant/20">Sensibilité lumière</button>
+<button class="bg-surface-container-low hover:bg-surface-container-high transition-colors text-xs font-semibold px-4 py-2 rounded-full border border-outline-variant/20">Aucun autre symptôme</button>
+</div>
+<div class="mt-3">
+<span class="text-[10px] text-on-surface-variant/60 font-medium uppercase tracking-tight">LOCATOMED Assistant • 10:45</span>
+</div>
+</div>
+</div>
+<!-- Typing Indicator (Simulated) -->
+<div class="flex items-center gap-2 px-11 opacity-60">
+<div class="w-1.5 h-1.5 bg-outline rounded-full animate-pulse"></div>
+<div class="w-1.5 h-1.5 bg-outline rounded-full animate-pulse delay-75"></div>
+<div class="w-1.5 h-1.5 bg-outline rounded-full animate-pulse delay-150"></div>
+</div>
+</div>
+</main>
+<!-- Chat Input Floating Field -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 z-40">
+<div class="bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-outline-variant/20 flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+</button>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 placeholder:text-on-surface-variant/50" placeholder="Décrivez vos symptômes..." type="text"/>
+<button class="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-on-primary shadow-sm hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="send" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+<!-- BottomNavBar Destination Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-3 pb-8 bg-white/90 dark:bg-teal-950/90 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)] rounded-t-[2rem]">
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1.5 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1.5 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-teal-100 dark:bg-teal-800/40 text-teal-700 dark:text-teal-300 rounded-2xl px-4 py-1.5 scale-110 active:scale-90 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="smart_toy" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Assistant</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1.5 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Saved</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-4 py-1.5 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 transition-transform duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="document_scanner">document_scanner</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Scan</span>
+</a>
+</nav>
+</body></html>

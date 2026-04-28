@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(npx shadcn@latest add input label card select form -y)",
+      "Bash(node *)",
+      "Bash(badge)",
+      "Bash(dropdown\")",
+      "Bash(npx shadcn@latest add table badge dropdown-menu --yes)",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(grep -A 20 \"CREATE TABLE \\\\`notification_requests\\\\`\" drizzle/migrations/0000_quick_dark_beast.sql)",
+      "Bash(grep -A 15 \"CREATE TABLE \\\\`reservations\\\\`\" drizzle/migrations/0000_quick_dark_beast.sql)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(rm -f data/locatomed.db)",
+      "Bash(powershell -Command \"Stop-Process -Name node -Force -ErrorAction SilentlyContinue; Start-Sleep 2; Remove-Item data/locatomed.db -Force\")",
+      "Bash(curl -s \"https://router.project-osrm.org/route/v1/driving/-5.812452,35.785117;-5.799800,35.767300?overview=full&geometries=geojson\")",
+      "Bash(curl -v --max-time 10 \"https://router.project-osrm.org/route/v1/driving/-5.812452,35.785117;-5.799800,35.767300?overview=full&geometries=geojson\")",
+      "Bash(npm list *)",
+      "Bash(cat next.config.ts)",
+      "Bash(cat next.config.js)",
+      "Read(//c/Users/admin/Desktop/Doros/**)",
+      "PowerShell($env:DB_HOST=\"localhost\"; $env:DB_PORT=\"3306\"; $env:DB_USER=\"root\"; $env:DB_PASSWORD=\"Ndjy9423\"; $env:DB_NAME=\"locatomed\"; npm run db:generate)",
+      "PowerShell($env:DB_HOST=\"localhost\"; $env:DB_PORT=\"3306\"; $env:DB_USER=\"root\"; $env:DB_PASSWORD=\"Ndjy9423\"; $env:DB_NAME=\"locatomed\"; npm run db:migrate)",
+      "PowerShell($env:DB_HOST=\"localhost\"; $env:DB_PORT=\"3306\"; $env:DB_USER=\"root\"; $env:DB_PASSWORD=\"Ndjy9423\"; $env:DB_NAME=\"locatomed\"; npm run db:seed)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:3000/patient/dashboard\" -UseBasicParsing -MaximumRedirection 0 -ErrorAction Stop; \"STATUS: $\\($r.StatusCode\\)\" } catch { if \\($_.Exception.Response\\) { \"STATUS: $\\([int]$_.Exception.Response.StatusCode\\) $\\($_.Exception.Response.StatusDescription\\)\" } else { \"ERROR: $\\($_.Exception.Message\\)\" } })"
+    ]
+  }
+}

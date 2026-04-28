@@ -1,0 +1,24 @@
+{
+  "name": "LocatMed",
+  "short_name": "LocatMed",
+  "description": "La santé de vos proches n'attend pas — plateforme de santé numérique de Tanger.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050f0e",
+  "theme_color": "#0d9488",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.PNG",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.PNG",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
