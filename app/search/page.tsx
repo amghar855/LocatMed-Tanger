@@ -13,6 +13,7 @@ import {
 } from "@/lib/actions/medicine-search-actions";
 import type { PharmacyWithStock } from "@/lib/actions/medicine-search-actions";
 import { Search, Pill, ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Map is client-only (Leaflet needs window)
 const PharmacyMap = dynamic(() => import("@/components/locatomed/pharmacy-map"), { ssr: false });
@@ -72,104 +73,118 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-20">
-        <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-          <Link href="/" className="flex items-center gap-2 font-bold text-base">
-            <ArrowLeft className="h-4 w-4" />
-            LocatMed
-          </Link>
-          <span className="text-muted-foreground text-sm hidden sm:block">Trouver un médicament</span>
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-black/5 shadow-sm">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 h-16">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="p-2 hover:bg-black/5 rounded-full transition-colors flex items-center justify-center">
+              <ArrowLeft className="h-5 w-5 text-gray-700" />
+            </Link>
+            <Link href="/" className="flex items-center">
+              <img
+                src="/logo-locatomed.png"
+                alt="LocatMed"
+                className="h-12 w-auto object-contain"
+              />
+            </Link>
+          </div>
+          <span className="text-gray-500 font-medium text-sm hidden sm:block">Trouver un médicament</span>
         </div>
       </header>
 
-      {/* Hero search */}
-      {!selectedMedicine && (
-        <section className="py-16 px-4 text-center">
-          <h1 className="text-3xl font-bold mb-3">Trouvez Vos Médicaments</h1>
-          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Recherchez et localisez les pharmacies qui ont vos médicaments en stock
-          </p>
-          <SearchBox
-            query={query}
-            setQuery={setQuery}
-            suggestions={suggestions}
-            onSelect={selectMedicine}
-            isLoading={loadingSearch}
-            large
+      {/* Main Dashboard Layout */}
+      <div className="flex h-[calc(100vh-64px)] overflow-hidden bg-[#0f1113]">
+        {/* Left: Map Area */}
+        <div className="flex-1 relative">
+          <PharmacyMap
+            pharmacies={pharmacies}
+            selectedId={selectedPharmacyId}
+            onSelect={setSelectedPharmacyId}
           />
-        </section>
-      )}
 
-      {/* Results */}
-      {selectedMedicine && (
-        <div className="mx-auto max-w-6xl px-4 py-6 space-y-6">
-          {/* Medicine info + search bar */}
-          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-            <Card className="flex-1">
-              <CardContent className="flex items-start gap-3 p-4">
-                <Pill className="h-5 w-5 mt-0.5 text-primary shrink-0" />
-                <div>
-                  <p className="font-semibold">{selectedMedicine.name}</p>
-                  <p className="text-sm text-muted-foreground">{selectedMedicine.activeIngredient}</p>
-                  {selectedMedicine.dosageForm && (
-                    <p className="text-xs text-muted-foreground">{selectedMedicine.dosageForm}</p>
-                  )}
-                  {selectedMedicine.ppm && (
-                    <p className="text-xs mt-1 font-medium">{selectedMedicine.ppm.toFixed(2)} MAD</p>
-                  )}
-                </div>
-                <div className="ml-auto text-right">
-                  <p className="text-sm font-medium text-primary">{inStockCount}</p>
-                  <p className="text-xs text-muted-foreground">pharmacie{inStockCount !== 1 ? "s" : ""} en stock</p>
-                </div>
-              </CardContent>
-            </Card>
-            <div className="sm:w-72">
-              <SearchBox
-                query={query}
-                setQuery={(q) => { setQuery(q); if (q !== selectedMedicine.name) clearSelection(); }}
-                suggestions={suggestions}
-                onSelect={selectMedicine}
-                isLoading={loadingSearch}
-              />
-            </div>
+          {/* Floating Search Bar (Top Center) */}
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 z-[400] w-full max-w-xl px-4">
+            <SearchBox
+              query={query}
+              setQuery={(q) => {
+                setQuery(q);
+                if (selectedMedicine && q !== selectedMedicine.name) clearSelection();
+              }}
+              suggestions={suggestions}
+              onSelect={selectMedicine}
+              isLoading={loadingSearch}
+              large={!selectedMedicine}
+            />
           </div>
 
-          {loadingStock ? (
-            <div className="py-16 text-center text-muted-foreground">Recherche des pharmacies…</div>
-          ) : pharmacies.length === 0 ? (
-            <div className="py-16 text-center text-muted-foreground">
-              <p className="font-medium">Aucune pharmacie ne stocke ce médicament à Tanger.</p>
-              <p className="text-sm mt-1">Essayez un médicament équivalent ou revenez plus tard.</p>
-            </div>
-          ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
-              {/* Map */}
-              <div className="h-[480px] rounded-lg overflow-hidden border">
-                <PharmacyMap
-                  pharmacies={pharmacies}
-                  selectedId={selectedPharmacyId}
-                  onSelect={setSelectedPharmacyId}
-                />
-              </div>
-
-              {/* Cards list */}
-              <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
-                {pharmacies.map((p) => (
-                  <PharmacyCard
-                    key={p.pharmacyId}
-                    pharmacy={p}
-                    medicineId={selectedMedicine.id}
-                    medicineName={selectedMedicine.name}
-                    isSelected={selectedPharmacyId === p.pharmacyId}
-                    onClick={() => setSelectedPharmacyId(p.pharmacyId)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Emergency SOS Button (Bottom Right) */}
+          <button className="absolute bottom-8 right-8 z-[400] bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-full flex items-center gap-2 font-black uppercase text-xs tracking-widest shadow-[0_0_30px_rgba(220,38,38,0.4)] transition-all hover:scale-105 active:scale-95">
+            <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
+            Emergency SOS
+          </button>
         </div>
-      )}
+
+        {/* Right: Dark Sidebar */}
+        <div className="w-[450px] bg-[#0f1113] border-l border-white/5 flex flex-col">
+          {/* Sidebar Header */}
+          <div className="p-6 border-b border-white/5 bg-[#1A1D1F]/50">
+            {selectedMedicine ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-black text-teal-500 uppercase tracking-widest">Current Search</p>
+                    <h2 className="text-3xl font-black text-white tracking-tighter">{selectedMedicine.name}</h2>
+                    <p className="text-xs font-bold text-gray-500">{selectedMedicine.activeIngredient}</p>
+                  </div>
+                  <div className="h-12 w-12 rounded-2xl bg-teal-500/10 flex items-center justify-center">
+                    <Pill className="h-6 w-6 text-teal-500" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="bg-white/5 border-white/10 text-gray-400 text-[10px] font-bold">
+                    {inStockCount} Found
+                  </Badge>
+                  <Badge variant="outline" className="bg-white/5 border-white/10 text-gray-400 text-[10px] font-bold">
+                    Tanger Region
+                  </Badge>
+                </div>
+              </div>
+            ) : (
+              <div className="py-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto">
+                  <Search className="h-8 w-8 text-gray-600" />
+                </div>
+                <p className="text-gray-400 font-bold uppercase text-xs tracking-widest">Select a medicine to see results</p>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar Content (Results List) */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            {loadingStock ? (
+              <div className="py-20 text-center space-y-4">
+                <div className="h-10 w-10 border-4 border-teal-500/20 border-t-teal-500 rounded-full animate-spin mx-auto" />
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Syncing Stock Data...</p>
+              </div>
+            ) : pharmacies.length === 0 && selectedMedicine ? (
+              <div className="py-20 text-center space-y-4 px-8">
+                <p className="text-white font-bold">No pharmacies found</p>
+                <p className="text-xs text-gray-500">We couldn't find any stock for this medicine in Tanger at the moment.</p>
+              </div>
+            ) : (
+              pharmacies.map((p) => (
+                <PharmacyCard
+                  key={p.pharmacyId}
+                  pharmacy={p}
+                  medicineId={selectedMedicine?.id || ""}
+                  medicineName={selectedMedicine?.name || ""}
+                  isSelected={selectedPharmacyId === p.pharmacyId}
+                  onClick={() => setSelectedPharmacyId(p.pharmacyId)}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -193,19 +208,25 @@ function SearchBox({
 }) {
   return (
     <div className={`relative ${large ? "mx-auto max-w-xl w-full" : "w-full"}`}>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <div className="relative group">
+        <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400 transition-colors group-focus-within:text-teal-500" />
         <Input
-          placeholder="Ex: Doliprane, paracétamol…"
-          className={`pl-9 ${large ? "h-12 text-base" : ""}`}
+          placeholder="Rechercher un médicament (ex: Doliprane)..."
+          className={cn(
+            "pl-14 transition-all duration-500 border-white/40 bg-white/60 backdrop-blur-xl",
+            "focus:border-teal-500/50 focus:ring-[12px] focus:ring-teal-500/5",
+            large 
+              ? "h-20 text-xl rounded-[2rem] shadow-2xl hover:shadow-teal-500/10 placeholder:text-gray-300" 
+              : "h-14 rounded-2xl shadow-lg shadow-black/5"
+          )}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoFocus={large}
         />
         {isLoading && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-            …
-          </span>
+          <div className="absolute right-4 top-1/2 -translate-y-1/2">
+            <div className="h-4 w-4 border-2 border-teal-500/20 border-t-teal-500 rounded-full animate-spin" />
+          </div>
         )}
       </div>
 
