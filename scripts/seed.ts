@@ -3,6 +3,7 @@
  * Never runs in production.  Run with: npm run db:seed
  */
 
+import "dotenv/config";
 import path from "path";
 import { readFileSync } from "fs";
 import { randomUUID } from "crypto";
