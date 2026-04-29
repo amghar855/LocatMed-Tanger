@@ -31,13 +31,14 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Brand */}
-          <div className="col-span-2 lg:col-span-1 space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-500 to-teal-500 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">S</span>
-              </div>
-              <span className="font-bold text-xl text-white">LocatMed</span>
-            </div>
+          <div className="col-span-2 lg:col-span-1 space-y-6">
+            <Link href="/" className="inline-block">
+              <img 
+                src="/logo-locatmed-dark.png" 
+                alt="LocatMed" 
+                className="h-10 w-auto" 
+              />
+            </Link>
             <p className="text-sm leading-relaxed">
               Votre parcours de santé connecté — médicaments, rendez-vous et
               dossiers médicaux en un seul endroit.
