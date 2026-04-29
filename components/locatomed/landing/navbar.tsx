@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils";
 const SECTION_IDS = ["hero", "features", "how-it-works", "why-us", "contact"];
 
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("hero");
   const pathname = usePathname();
   const { t } = useI18n();
@@ -28,12 +27,6 @@ export function Navbar() {
     { label: t("landingNavbar.contact", "Contact"), href: "#contact" },
   ];
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     if (pathname !== "/") return;
@@ -69,11 +62,9 @@ export function Navbar() {
   const desktopLinkClass = (active: boolean) =>
     cn(
       "text-sm transition-colors border-b-2",
-      active ? "font-bold border-[#0d9488]" : "font-medium border-transparent",
-      scrolled && active && "text-[#0d9488]",
-      scrolled && !active && "text-[#0f2420] hover:text-[#0d9488]",
-      !scrolled && active && "text-white",
-      !scrolled && !active && "text-white/90 hover:text-white"
+      active 
+        ? "font-bold text-[#0d9488] border-[#0d9488]" 
+        : "font-medium text-[#0f2420] hover:text-[#0d9488] border-transparent"
     );
 
   const mobileLinkClass = (active: boolean) =>
@@ -86,13 +77,11 @@ export function Navbar() {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b"
+      className="fixed top-0 left-0 right-0 z-50 border-b border-black/5 shadow-sm"
       style={{
-        backgroundColor: scrolled ? "rgba(255, 255, 255, 0.85)" : "rgba(255, 255, 255, 0.08)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderBottomColor: scrolled ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.12)",
-        borderBottomWidth: "1px",
+        backgroundColor: "rgba(255, 255, 255, 0.8)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,14 +97,12 @@ export function Navbar() {
 
           {/* Desktop nav */}
           <nav
-            className="hidden md:flex items-center gap-6 border"
+            className="hidden md:flex items-center gap-6"
             style={{
-              backgroundColor: "rgba(255, 255, 255, 0.10)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              borderColor: "rgba(255, 255, 255, 0.18)",
+              backgroundColor: "rgba(13, 148, 136, 0.05)",
               borderRadius: "9999px",
-              padding: "6px 20px",
+              padding: "6px 24px",
+              border: "1px solid rgba(13, 148, 136, 0.1)",
             }}
           >
             {navLinks.map((link) => {
@@ -144,12 +131,7 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             <Link
               href="/patient/login"
-              className={cn(
-                "inline-flex items-center justify-center transition-colors",
-                scrolled
-                  ? "bg-transparent text-[#0d9488] border-[#0d9488] hover:bg-[#f0fdfa]"
-                  : "bg-transparent text-white border-white hover:bg-white/10"
-              )}
+              className="inline-flex items-center justify-center transition-colors text-[#0d9488] border-[#0d9488] hover:bg-[#f0fdfa]"
               style={{
                 fontWeight: 700,
                 borderRadius: "9999px",
