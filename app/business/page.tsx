@@ -65,13 +65,14 @@ export default function BusinessPage() {
   return (
     <>
       {/* Minimal navbar */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-black/5 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-500 to-teal-500 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
-            </div>
-            <span className="font-bold text-xl text-gray-900">LocatMed</span>
+            <img
+              src="/logo-locatomed.png"
+              alt="LocatMed"
+              className="h-12 w-auto object-contain"
+            />
           </Link>
           <Link
             href="/"
@@ -92,18 +93,18 @@ export default function BusinessPage() {
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-100/50 rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-teal-100/40 rounded-full blur-3xl" />
 
-          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+          <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-left space-y-8 pl-12">
             <div className="inline-flex items-center gap-2 bg-slate-900 rounded-full px-4 py-1.5">
               <span className="text-sm font-medium text-white">Plateforme professionnelle</span>
             </div>
-            <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight">
+            <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-[1.1]">
               Pour les{" "}
               <span className="bg-gradient-to-r from-teal-500 to-teal-500 bg-clip-text text-transparent">
                 professionnels
               </span>{" "}
               de santé
             </h1>
-            <p className="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-500 max-w-2xl leading-relaxed">
               LocatMed propose des outils dédiés à chaque acteur de la santé —
               médecins, pharmaciens et administrateurs hospitaliers.
             </p>
