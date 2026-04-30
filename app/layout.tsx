@@ -32,8 +32,18 @@ export const metadata: Metadata = {
     title: "LocatMed",
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    apple: [
+      {
+        url: "/logo.PNG",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/logo.PNG",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
   },
 };
 

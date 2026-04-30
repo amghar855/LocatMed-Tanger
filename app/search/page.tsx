@@ -215,8 +215,8 @@ function SearchBox({
           className={cn(
             "pl-14 transition-all duration-500 border-white/40 bg-white/60 backdrop-blur-xl",
             "focus:border-teal-500/50 focus:ring-[12px] focus:ring-teal-500/5",
-            large 
-              ? "h-20 text-xl rounded-[2rem] shadow-2xl hover:shadow-teal-500/10 placeholder:text-gray-300" 
+            large
+              ? "h-20 text-xl rounded-[2rem] shadow-2xl hover:shadow-teal-500/10 placeholder:text-gray-300"
               : "h-14 rounded-2xl shadow-lg shadow-black/5"
           )}
           value={query}

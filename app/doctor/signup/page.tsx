@@ -60,11 +60,8 @@ export default function DoctorSignupPage() {
         }}
       >
         {/* Logo + tagline */}
-        <div className="flex flex-col items-center mb-6">
-          <img src="/logo-locatomed.png" alt="LocatMed" className="h-10 w-auto mx-auto" />
-          <p className="mt-2 text-xs italic text-teal-600 text-center">
-            La santé de vos proches n&apos;attend pas
-          </p>
+        <div className="flex flex-col items-center mb-8">
+          <img src="/logo-locatomed.png" alt="LocatMed" className="h-16 w-auto mx-auto" />
         </div>
 
         {/* Title */}
