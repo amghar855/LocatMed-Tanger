@@ -14,6 +14,12 @@ export interface ChatbotResponse {
   answer: string;
   intent: ChatIntent;
   suggestions: ChatSuggestion[];
+  retrieval?: {
+    used: boolean;
+    pharmacySuggestionCount: number;
+    usedMedicineAvailabilitySearch: boolean;
+    usedOnDutyFallback: boolean;
+  };
 }
 
 export interface ChatbotStarterContext {

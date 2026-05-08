@@ -7,21 +7,9 @@ import type {
   ChatIntent,
   ChatSuggestion,
 } from "@/features/patient/types/chatbot";
-import { z } from "zod";
-import { createAzure } from "@ai-sdk/azure";
+import { getAzureChatModelOrNull } from "@/lib/ai/azure";
 import { generateText } from "ai";
-
-// Initialize Azure OpenAI provider with custom env variable names
-if (!process.env.AZURE_OPENAI_API_KEY || !process.env.AZURE_OPENAI_ENDPOINT) {
-  throw new Error(
-    "Missing required Azure OpenAI environment variables: AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT"
-  );
-}
-
-const azure = createAzure({
-  apiKey: process.env.AZURE_OPENAI_API_KEY,
-  endpoint: process.env.AZURE_OPENAI_ENDPOINT,
-});
+import { z } from "zod";
 
 const specialtyHints: Record<string, string> = {
   cardio: "cardio",
@@ -34,6 +22,15 @@ const specialtyHints: Record<string, string> = {
   peau: "dermato",
   urgence: "urgence",
 };
+
+function tokenizeQuestion(question: string): string[] {
+  return question
+    .toLowerCase()
+    .replace(/[\u2019']/g, " ")
+    .replace(/[^a-z0-9\u00C0-\u017F\s]/gi, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+}
 
 function detectIntent(question: string): ChatIntent {
   const text = question.toLowerCase();
@@ -53,6 +50,13 @@ function detectIntent(question: string): ChatIntent {
     return "discover";
   }
 
+  // Heuristic: if a medicine-like keyword is present (e.g. "doliprane"),
+  // treat it as a pharmacy intent even if the user doesn't mention "medicament/pharmacie".
+  const medicineQuery = extractMedicineQuery(question);
+  if (medicineQuery) {
+    return "pharmacy";
+  }
+
   return "general";
 }
 
@@ -67,12 +71,7 @@ function detectSpecialtyKeyword(question: string): string | null {
 }
 
 function detectMedicineKeyword(question: string): string | null {
-  const words = question
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
-    .split(/\s+/)
-    .filter(Boolean);
-
+  const words = tokenizeQuestion(question);
   const ignored = new Set([
     "bonjour",
     "salut",
@@ -89,10 +88,71 @@ function detectMedicineKeyword(question: string): string | null {
     "pour",
     "dans",
     "tanger",
+    "cherche",
+    "cherch",
+    "recherche",
+    "trouver",
+    "trouve",
+    "trouvez",
+    "veux",
+    "veut",
+    "besoin",
+    "bghit",
+    "kan9lb",
+    "ken9lb",
+    "n9lb",
+    "n9ellb",
+    "wahd",
+    "chi",
+    "fin",
+    "fina",
+    "win",
+    "wach",
+    "3la",
+    "ila",
+    "li",
+    "l",
+    "smito",
+    "ismo",
+    "smiyto",
+    "nom",
+    "called",
+    "named",
   ]);
 
   const candidate = words.find((word) => word.length >= 4 && !ignored.has(word));
   return candidate ?? null;
+}
+
+function extractMedicineQuery(question: string): string | null {
+  const words = tokenizeQuestion(question);
+  if (words.length === 0) return null;
+
+  const anchors = new Set([
+    "medicament",
+    "medicaments",
+    "médicament",
+    "médicaments",
+    "medicine",
+    "drug",
+    "ordo",
+    "ordonnance",
+    "ismo",
+    "smito",
+    "smiyto",
+    "nom",
+    "called",
+    "named",
+  ]);
+
+  for (let i = 0; i < words.length; i++) {
+    if (!anchors.has(words[i]!)) continue;
+    const next = words[i + 1];
+    if (next && next.length >= 3) return next;
+  }
+
+  // Fallback heuristic for short queries like "doliprane tanger"
+  return detectMedicineKeyword(question);
 }
 
 async function getOnDutyPharmacySuggestions(limit = 3): Promise<ChatSuggestion[]> {
@@ -114,6 +174,22 @@ async function getOnDutyPharmacySuggestions(limit = 3): Promise<ChatSuggestion[]
     subtitle: row.neighborhood ?? row.address ?? "Pharmacie de garde",
     href: "/patient/discover?view=pharmacies",
   }));
+}
+
+async function resolveMedicineByName(query: string): Promise<{ id: string; name: string } | null> {
+  const like = `%${query}%`;
+
+  const rows = await db
+    .select({ id: medicines.id, name: medicines.name })
+    .from(medicines)
+    .where(sql`lower(${medicines.name}) LIKE lower(${like})`)
+    .orderBy(
+      sql`CASE WHEN lower(${medicines.name}) = lower(${query}) THEN 0 ELSE 1 END`,
+      sql`length(${medicines.name})`
+    )
+    .limit(1);
+
+  return rows[0] ?? null;
 }
 
 async function getHospitalSuggestionsBySpecialty(specialty: string, limit = 3): Promise<ChatSuggestion[]> {
@@ -144,8 +220,12 @@ async function getHospitalSuggestionsBySpecialty(specialty: string, limit = 3): 
   }));
 }
 
-async function getMedicineAvailabilitySuggestions(medicineKeyword: string, limit = 3): Promise<ChatSuggestion[]> {
-  const like = `%${medicineKeyword}%`;
+async function getMedicineAvailabilitySuggestions(medicineQuery: string, limit = 3): Promise<ChatSuggestion[]> {
+  const resolved = await resolveMedicineByName(medicineQuery);
+  const like = `%${resolved?.name ?? medicineQuery}%`;
+  const nameCondition = resolved
+    ? eq(medicines.id, resolved.id)
+    : sql`lower(${medicines.name}) LIKE lower(${like})`;
 
   const rows = await db
     .select({
@@ -159,8 +239,7 @@ async function getMedicineAvailabilitySuggestions(medicineKeyword: string, limit
     .innerJoin(medicines, eq(pharmacyStock.medicineId, medicines.id))
     .innerJoin(pharmacies, eq(pharmacyStock.pharmacyId, pharmacies.id))
     .where(
-      sql`lower(${medicines.name}) LIKE lower(${like})
-        AND ${pharmacyStock.quantity} > 0`
+      sql`${nameCondition} AND ${pharmacyStock.quantity} > 0`
     )
     .orderBy(desc(pharmacyStock.quantity))
     .limit(limit);
@@ -215,24 +294,64 @@ function uniqueSuggestions(items: ChatSuggestion[]): ChatSuggestion[] {
   return output;
 }
 
+async function generateAssistantAnswer(options: {
+  question: string;
+  intent: ChatIntent;
+  suggestions: ChatSuggestion[];
+  fallback: string;
+  retrievalFacts: string;
+  medicineQuery: string | null;
+}): Promise<string> {
+  const azure = getAzureChatModelOrNull();
+  if (!azure) return options.fallback;
+
+  try {
+    const { text } = await generateText({
+      model: azure.model,
+      maxOutputTokens: 220,
+      temperature: 0.4,
+      system:
+        "You are LocatMed's patient assistant for Tangier, Morocco. Use the provided retrieval facts as the ONLY source of pharmacy/availability info (do not invent). Do NOT paste or duplicate the retrieval facts verbatim; instead, write a short helpful answer (1-4 sentences) and reference up to 2 pharmacy names max. If the user asks for a medicine, confirm the medicine name and suggest the next in-app action to check availability.",
+      prompt: [
+        `User question: ${options.question}`,
+        `Detected intent: ${options.intent}`,
+        `Medicine query: ${options.medicineQuery ?? "(none)"}`,
+        `Retrieval facts:\n${options.retrievalFacts}`,
+        `Fallback answer (if needed): ${options.fallback}`,
+      ].join("\n"),
+    });
+
+    const cleaned = text.trim();
+    return cleaned.length > 0 ? cleaned : options.fallback;
+  } catch (error) {
+    console.error("Azure OpenAI generation failed:", error);
+    return options.fallback;
+  }
+}
+
 export async function askPatientChatbot(question: string, _patientId: string): Promise<ChatbotResponse> {
   const intent = detectIntent(question);
   const collectedSuggestions: ChatSuggestion[] = [];
   const medicineParams = z.object({ medicineName: z.string().min(2) });
   const specialtyParams = z.object({ specialty: z.string().min(2) });
 
+  let usedMedicineAvailabilitySearch = false;
+  let usedOnDutyFallback = false;
+  const medicineQuery = intent === "pharmacy" ? extractMedicineQuery(question) : null;
+
   if (intent === "pharmacy") {
-    const detectedMedicine = detectMedicineKeyword(question);
-    if (detectedMedicine) {
-      const parsed = medicineParams.safeParse({ medicineName: detectedMedicine });
+    if (medicineQuery) {
+      const parsed = medicineParams.safeParse({ medicineName: medicineQuery });
       if (parsed.success) {
         const suggestions = await getMedicineAvailabilitySuggestions(parsed.data.medicineName);
+        usedMedicineAvailabilitySearch = true;
         collectedSuggestions.push(...suggestions);
       }
     }
 
     if (collectedSuggestions.length === 0) {
       const dutySuggestions = await getOnDutyPharmacySuggestions(3);
+      usedOnDutyFallback = true;
       collectedSuggestions.push(...dutySuggestions);
     }
   }
@@ -259,54 +378,50 @@ export async function askPatientChatbot(question: string, _patientId: string): P
     }
   }
 
+  const text = (() => {
+    if (intent === "booking") {
+      return "Mzyan, n9dar n3awnk bach t7jez rendez-vous. Choisis un hopital ou un medecin men les options et kamel la reservation.";
+    }
+
+    if (intent === "pharmacy") {
+      if (collectedSuggestions.some((item) => item.type === "pharmacy")) {
+        return "Safi, chofit lik options dyal pharmacies f Tanger. T9dar tdkhol l details bach tchof disponibilite dyal medicament.";
+      }
+      return "Ma banlix daba disponibilite moubachira. Nqdr nwerik pharmacies de garde bach tsowwel 3la stock.";
+    }
+
+    if (intent === "discover") {
+      return "Nqdar n3awnk tktachef hopitaux w specialites f Tanger. Chof les suggestions li t7t bach tbda.";
+    }
+
+    return "Marhba bik f LocatMed. Nqdar n3awnk b reservation, recherche de medicaments, w decouverte dyal hopitaux f Tanger.";
+  })();
+
   if (collectedSuggestions.length === 0) {
     collectedSuggestions.push(...buildBaseActionSuggestions());
   }
 
-  // Generate AI-powered response from Azure OpenAI
-  let answer: string;
-  try {
-    const systemPrompt = `Tu es un assistant médical pour LocatMed à Tanger. 
-Reponds de manière concise en Darija (arabe marocain) ou en français.
-Sois amical, utile et guide l'utilisateur vers les services pertinents.
-Exemples de services disponibles:
-- Prendre un rendez-vous (reservation)
-- Chercher des medicaments et pharmacies
-- Découvrir des hopitaux`;
-
-    const { text: generatedText } = await generateText({
-      model: azure(process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o"),
-      system: systemPrompt,
-      prompt: question,
-      temperature: 0.7,
-      maxTokens: 150,
-    });
-
-    answer = generatedText.trim();
-  } catch (error) {
-    console.error("Azure OpenAI Error:", error);
-    // Fallback to intent-based response if API fails
-    answer = (() => {
-      if (intent === "booking") {
-        return "Mzyan, n9dar n3awnk bach t7jez rendez-vous. Choisis un hopital ou un medecin men les options et kamel la reservation.";
-      }
-      if (intent === "pharmacy") {
-        if (collectedSuggestions.some((item) => item.type === "pharmacy")) {
-          return "Safi, chofit lik options dyal pharmacies f Tanger. T9dar tdkhol l details bach tchof disponibilite dyal medicament.";
-        }
-        return "Ma banlix daba disponibilite moubachira. Nqdr nwerik pharmacies de garde bach tsowwel 3la stock.";
-      }
-      if (intent === "discover") {
-        return "Nqdar n3awnk tktachef hopitaux w specialites f Tanger. Chof les suggestions li t7t bach tbda.";
-      }
-      return "Marhba bik f LocatMed. Nqdar n3awnk b reservation, recherche de medicaments, w decouverte dyal hopitaux f Tanger.";
-    })();
-  }
+  const suggestions = uniqueSuggestions(collectedSuggestions).slice(0, 6);
+  const retrievalFacts = suggestions.map((s) => `${s.type}|${s.title}|${s.subtitle ?? ""}|${s.href}`).join("\n");
+  const enhancedText = await generateAssistantAnswer({
+    question,
+    intent,
+    suggestions,
+    fallback: text,
+    retrievalFacts,
+    medicineQuery,
+  });
 
   return {
-    answer,
+    answer: enhancedText,
     intent,
-    suggestions: uniqueSuggestions(collectedSuggestions).slice(0, 6),
+    suggestions,
+    retrieval: {
+      used: intent === "pharmacy" || intent === "discover" || intent === "booking",
+      pharmacySuggestionCount: suggestions.filter((s) => s.type === "pharmacy").length,
+      usedMedicineAvailabilitySearch,
+      usedOnDutyFallback,
+    },
   };
 }
 
