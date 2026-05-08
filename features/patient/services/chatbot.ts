@@ -8,6 +8,20 @@ import type {
   ChatSuggestion,
 } from "@/features/patient/types/chatbot";
 import { z } from "zod";
+import { createAzure } from "@ai-sdk/azure";
+import { generateText } from "ai";
+
+// Initialize Azure OpenAI provider with custom env variable names
+if (!process.env.AZURE_OPENAI_API_KEY || !process.env.AZURE_OPENAI_ENDPOINT) {
+  throw new Error(
+    "Missing required Azure OpenAI environment variables: AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT"
+  );
+}
+
+const azure = createAzure({
+  apiKey: process.env.AZURE_OPENAI_API_KEY,
+  endpoint: process.env.AZURE_OPENAI_ENDPOINT,
+});
 
 const specialtyHints: Record<string, string> = {
   cardio: "cardio",
@@ -245,31 +259,52 @@ export async function askPatientChatbot(question: string, _patientId: string): P
     }
   }
 
-  const text = (() => {
-    if (intent === "booking") {
-      return "Mzyan, n9dar n3awnk bach t7jez rendez-vous. Choisis un hopital ou un medecin men les options et kamel la reservation.";
-    }
-
-    if (intent === "pharmacy") {
-      if (collectedSuggestions.some((item) => item.type === "pharmacy")) {
-        return "Safi, chofit lik options dyal pharmacies f Tanger. T9dar tdkhol l details bach tchof disponibilite dyal medicament.";
-      }
-      return "Ma banlix daba disponibilite moubachira. Nqdr nwerik pharmacies de garde bach tsowwel 3la stock.";
-    }
-
-    if (intent === "discover") {
-      return "Nqdar n3awnk tktachef hopitaux w specialites f Tanger. Chof les suggestions li t7t bach tbda.";
-    }
-
-    return "Marhba bik f LocatMed. Nqdar n3awnk b reservation, recherche de medicaments, w decouverte dyal hopitaux f Tanger.";
-  })();
-
   if (collectedSuggestions.length === 0) {
     collectedSuggestions.push(...buildBaseActionSuggestions());
   }
 
+  // Generate AI-powered response from Azure OpenAI
+  let answer: string;
+  try {
+    const systemPrompt = `Tu es un assistant médical pour LocatMed à Tanger. 
+Reponds de manière concise en Darija (arabe marocain) ou en français.
+Sois amical, utile et guide l'utilisateur vers les services pertinents.
+Exemples de services disponibles:
+- Prendre un rendez-vous (reservation)
+- Chercher des medicaments et pharmacies
+- Découvrir des hopitaux`;
+
+    const { text: generatedText } = await generateText({
+      model: azure(process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o"),
+      system: systemPrompt,
+      prompt: question,
+      temperature: 0.7,
+      maxTokens: 150,
+    });
+
+    answer = generatedText.trim();
+  } catch (error) {
+    console.error("Azure OpenAI Error:", error);
+    // Fallback to intent-based response if API fails
+    answer = (() => {
+      if (intent === "booking") {
+        return "Mzyan, n9dar n3awnk bach t7jez rendez-vous. Choisis un hopital ou un medecin men les options et kamel la reservation.";
+      }
+      if (intent === "pharmacy") {
+        if (collectedSuggestions.some((item) => item.type === "pharmacy")) {
+          return "Safi, chofit lik options dyal pharmacies f Tanger. T9dar tdkhol l details bach tchof disponibilite dyal medicament.";
+        }
+        return "Ma banlix daba disponibilite moubachira. Nqdr nwerik pharmacies de garde bach tsowwel 3la stock.";
+      }
+      if (intent === "discover") {
+        return "Nqdar n3awnk tktachef hopitaux w specialites f Tanger. Chof les suggestions li t7t bach tbda.";
+      }
+      return "Marhba bik f LocatMed. Nqdar n3awnk b reservation, recherche de medicaments, w decouverte dyal hopitaux f Tanger.";
+    })();
+  }
+
   return {
-    answer: text,
+    answer,
     intent,
     suggestions: uniqueSuggestions(collectedSuggestions).slice(0, 6),
   };
