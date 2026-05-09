@@ -155,7 +155,7 @@ export function HeroSection() {
             {/* CTA buttons */}
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/search"
+                href="/patient/signup"
                 className={cn(
                   buttonVariants({ size: "lg" }),
                   "bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-900/40 h-12 px-6 text-base border-0"

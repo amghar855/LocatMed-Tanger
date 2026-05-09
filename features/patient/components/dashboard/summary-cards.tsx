@@ -1,5 +1,6 @@
 import { CalendarCheck2, CheckCircle2, Clock, Heart, XCircle } from "lucide-react";
 import { getServerTranslator } from "@/lib/i18n/server";
+import { BorderGlow } from "@/components/ui/border-glow";
 
 type Props = {
   favoritesCount: number;
@@ -79,20 +80,28 @@ export async function PatientSummaryCards({
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div
+            <BorderGlow
               key={stat.label}
-              className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-4"
+              backgroundColor="white"
+              borderRadius={12}
+              colors={['#00a99d', '#2dd4bf', '#38bdf8']}
+              edgeSensitivity={20}
+              animated={false}
             >
-              <div className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${stat.iconBg}`}>
-                <Icon className={`size-4 ${stat.iconColor}`} />
+              <div
+                className="flex h-full items-center gap-3 px-4 py-4"
+              >
+                <div className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${stat.iconBg}`}>
+                  <Icon className={`size-4 ${stat.iconColor}`} />
+                </div>
+                <div>
+                  <p className={`text-xl font-bold leading-none ${stat.valueColor}`}>
+                    {stat.value}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500">{stat.label}</p>
+                </div>
               </div>
-              <div>
-                <p className={`text-xl font-bold leading-none ${stat.valueColor}`}>
-                  {stat.value}
-                </p>
-                <p className="mt-0.5 text-xs text-slate-500">{stat.label}</p>
-              </div>
-            </div>
+            </BorderGlow>
           );
         })}
       </div>

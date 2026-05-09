@@ -32,14 +32,15 @@ export const metadata: Metadata = {
     title: "LocatMed",
   },
   icons: {
+    icon: "/cropped_circle_image.png",
     apple: [
       {
-        url: "/logo.PNG",
+        url: "/cropped_circle_image.png",
         sizes: "192x192",
         type: "image/png",
       },
       {
-        url: "/logo.PNG",
+        url: "/cropped_circle_image.png",
         sizes: "512x512",
         type: "image/png",
       },
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0d9488",
+  themeColor: "#14b8a6",
 };
 
 export default async function RootLayout({
