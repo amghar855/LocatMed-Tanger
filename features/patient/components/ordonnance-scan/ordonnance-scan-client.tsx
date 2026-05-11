@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Camera, CameraOff, FileText, Loader2, Paperclip, ScanLine, Upload } from "lucide-react";
-import { scanOrdonnanceAction } from "@/app/patient/ordonnance-scan/actions";
 import { TANGIER_CENTER } from "@/features/patient/constants/tangier";
-import type { MedicinePharmacyAvailability, OrdonnanceScanResult } from "@/features/patient/types/ordonnance-scan";
+import type { ChatbotResponse } from "@/features/patient/types/chatbot";
+import type { MedicinePharmacyAvailability } from "@/features/patient/types/ordonnance-scan";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,11 @@ import { useI18n } from "@/components/locatomed/i18n-provider";
 type UserLocation = {
   lat: number;
   lng: number;
+};
+
+type OcrResult = {
+  text: string;
+  medicines: string[];
 };
 
 function haversineKm(a: UserLocation, b: UserLocation) {
@@ -50,7 +55,8 @@ function StockBadge({ status }: { status: MedicinePharmacyAvailability["stockSta
 export function OrdonnanceScanClient() {
   const { t } = useI18n();
   const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<OrdonnanceScanResult | null>(null);
+  const [ocrResult, setOcrResult] = useState<OcrResult | null>(null);
+  const [chatbotResponse, setChatbotResponse] = useState<ChatbotResponse | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraPending, setCameraPending] = useState(false);
@@ -89,17 +95,55 @@ export function OrdonnanceScanClient() {
     }
 
     const formData = new FormData();
-    formData.set("ordonnanceFile", selectedFile);
+    formData.append("file", selectedFile);
 
     startTransition(async () => {
-      const response = await scanOrdonnanceAction(formData);
-      if (response?.error) {
-        toast.error(response.error);
-        return;
-      }
-      if (response?.data) {
-        setResult(response.data);
-        toast.success(t("patient.ordonnance.scanDone"));
+      try {
+        setOcrResult(null);
+        setChatbotResponse(null);
+
+        // Step 1: Call OCR API
+        const ocrRes = await fetch("/api/ocr", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!ocrRes.ok) {
+          toast.error("Échec de l'extraction OCR");
+          return;
+        }
+
+        const ocrData: OcrResult = await ocrRes.json();
+        setOcrResult(ocrData);
+
+        // Step 2: Call Chatbot API if medicines found
+        let question = "find medicines: " + ocrData.medicines.join(", ");
+        if (ocrData.medicines.length === 0) {
+          // If no medicines found, use full text as fallback or a default query
+          question = "find pharmacies on duty"; 
+          toast.info("Aucun médicament spécifique détecté. Recherche des pharmacies de garde.");
+        } else {
+          toast.success(t("patient.ordonnance.scanDone"));
+        }
+
+        const chatRes = await fetch("/api/chatbot", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ question }),
+        });
+
+        if (chatRes.ok) {
+          const chatData = await chatRes.json();
+          setChatbotResponse(chatData);
+        } else {
+          toast.error("Erreur lors de la recherche de disponibilité");
+        }
+
+      } catch (err) {
+        console.error("Pipeline error:", err);
+        toast.error("Une erreur s'est produite lors du traitement");
       }
     });
   }
@@ -311,110 +355,74 @@ export function OrdonnanceScanClient() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {!result ? (
+          {!ocrResult && !isPending ? (
             <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-12 text-center">
               <FileText className="size-10 text-slate-300" />
               <p className="text-sm text-slate-500">
                 {t("patient.ordonnance.uploadPrompt")}
               </p>
             </div>
+          ) : isPending ? (
+             <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-12 text-center">
+              <Loader2 className="size-10 text-teal-600 animate-spin" />
+              <p className="text-sm text-slate-500">
+                Traitement en cours...
+              </p>
+            </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-xs text-slate-400">{t("patient.ordonnance.file")}: {result.fileName}</p>
+              <p className="text-xs text-slate-400">{t("patient.ordonnance.file")}: {selectedFile?.name}</p>
 
-              <div className="grid gap-3 lg:grid-cols-2">
-                {result.extractedMedicines.map((item) => (
-                  <article
-                    key={`${item.inputName}-${item.matchedMedicineId ?? "na"}`}
-                    className="rounded-xl border border-slate-100 bg-slate-50/60 p-4"
-                  >
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                      {t("patient.ordonnance.detected")}
-                    </p>
-                    <p className="font-heading text-sm font-semibold text-slate-900">
-                      {item.inputName}
-                    </p>
-
-                    {item.matchedMedicineId ? (
-                      <div className="mt-3 space-y-1.5 text-sm text-slate-700">
-                        <p>
-                          <span className="text-slate-400">{t("patient.ordonnance.medicine")}:</span>{" "}
-                          <span className="font-medium">{item.matchedMedicineName}</span>
-                        </p>
-                        {item.activeIngredient && (
-                          <p>
-                            <span className="text-slate-400">{t("patient.medicineSearch.activeIngredient")}:</span> {item.activeIngredient}
-                          </p>
-                        )}
-                        {item.dosageForm && (
-                          <p>
-                            <span className="text-slate-400">{t("patient.medicineSearch.form")}:</span> {item.dosageForm}
-                          </p>
-                        )}
-                        {item.ppm && (
-                          <p>
-                            <span className="text-slate-400">{t("patient.medicineSearch.ppm")}:</span> {item.ppm} MAD
-                          </p>
-                        )}
-                        <p className="text-xs text-slate-400">
-                          {t("patient.ordonnance.confidence")}: {Math.round(item.confidence * 100)}%
-                        </p>
-
-                        {item.availability.length > 0 && (
-                          <div className="mt-3 space-y-2 rounded-xl border border-slate-200 bg-white p-3">
-                            <p className="text-xs font-semibold text-slate-700">
-                              {t("patient.ordonnance.availability")}
-                            </p>
-                            <div className="grid gap-2 sm:grid-cols-2">
-                              {[...item.availability]
-                                .map((av) => ({
-                                  ...av,
-                                  distanceKm: haversineKm(userLocation, { lat: av.lat, lng: av.lng }),
-                                }))
-                                .sort((a, b) => {
-                                  const byStock = stockRank(b.stockStatus) - stockRank(a.stockStatus);
-                                  if (byStock !== 0) return byStock;
-                                  if (a.isOnDuty !== b.isOnDuty) return a.isOnDuty ? -1 : 1;
-                                  return a.distanceKm - b.distanceKm;
-                                })
-                                .slice(0, 6)
-                                .map((av) => (
-                                  <div
-                                    key={`${av.pharmacyId}-${av.medicineName}`}
-                                    className="rounded-lg border border-slate-100 bg-slate-50 p-2.5 text-xs"
-                                  >
-                                    <div className="mb-1.5 flex items-center justify-between gap-1">
-                                      <p className="font-medium text-slate-900 truncate">
-                                        {av.pharmacyName}
-                                      </p>
-                                      <StockBadge status={av.stockStatus} />
-                                    </div>
-                                    <p className="text-slate-500">{av.address ?? "—"}</p>
-                                    <p className="text-slate-500">{av.distanceKm.toFixed(2)} km</p>
-                                    <p className="text-slate-500">{av.price} MAD</p>
-                                    {av.isOnDuty && (
-                                      <p className="mt-1 font-medium text-cyan-600">{t("patient.medicineSearch.onDuty")}</p>
-                                    )}
-                                  </div>
-                                ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="mt-2 text-sm text-amber-700">
-                        {t("patient.ordonnance.noMatch")}
-                      </p>
-                    )}
-                  </article>
-                ))}
+              {/* Display Extracted Raw Text */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Texte Brut Extrait
+                </p>
+                <p className="text-sm text-slate-700 whitespace-pre-wrap">
+                  {ocrResult?.text || "Aucun texte trouvé"}
+                </p>
               </div>
 
-              {result.unmatchedInputs.length > 0 && (
-                <p className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                  {t("patient.ordonnance.unmatched")}: {result.unmatchedInputs.join(", ")}
-                </p>
-              )}
+              <div className="grid gap-3 lg:grid-cols-2">
+                <article className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 lg:col-span-2">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      Médicaments Détectés
+                    </p>
+                    {ocrResult?.medicines && ocrResult.medicines.length > 0 ? (
+                       <div className="flex flex-wrap gap-2">
+                          {ocrResult.medicines.map((med, i) => (
+                             <Badge key={i} className="rounded-full bg-teal-50 text-teal-700 hover:bg-teal-100 font-heading text-sm px-3 py-1">
+                               {med}
+                             </Badge>
+                          ))}
+                       </div>
+                    ) : (
+                       <p className="text-sm text-amber-700">Aucun médicament reconnu automatiquement.</p>
+                    )}
+                </article>
+
+                {chatbotResponse && chatbotResponse.suggestions.length > 0 && (
+                   <div className="mt-2 lg:col-span-2 space-y-2 rounded-xl border border-slate-200 bg-white p-4">
+                      <p className="text-xs font-semibold text-slate-700">
+                        Pharmacies Suggérées (via Assistant)
+                      </p>
+                      <p className="text-sm text-slate-600 mb-3">{chatbotResponse.answer}</p>
+                      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                         {chatbotResponse.suggestions.filter(s => s.type === "pharmacy").map((s) => (
+                           <div
+                              key={s.id}
+                              className="rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm"
+                           >
+                              <p className="font-medium text-slate-900 truncate">
+                                {s.title}
+                              </p>
+                              <p className="text-slate-500 text-xs mt-1">{s.subtitle}</p>
+                           </div>
+                         ))}
+                      </div>
+                   </div>
+                )}
+              </div>
             </div>
           )}
         </CardContent>
