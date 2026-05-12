@@ -79,7 +79,7 @@ Set these in your Azure App Service "Environment Variables" section:
 - `DB_USER` / `DB_PASSWORD` / `DB_NAME`: Database credentials.
 - `AZURE_OPENAI_API_KEY`: From Azure AI Studio.
 - `AZURE_OPENAI_ENDPOINT`: From Azure AI Studio.
-- `AZURE_OPENAI_DEPLOYMENT_NAME`: The name of your deployed model.
+- `AZURE_OPENAI_DEPLOYMENT_NAME`: gpt-4o.
 - `OCR_API_URL`: `https://medical-ocr.azurecontainerapps.io/ocr` (The internal or external URL of your FastAPI service).
 
 ### OCR API (Container Apps)
