@@ -7,7 +7,7 @@
     "dev:host": "next dev --turbopack --hostname 0.0.0.0 --port 3000",
     "build": "next build --webpack",
     "build:static": "cross-env CAPACITOR_STATIC_EXPORT=true next build --webpack",
-    "start": "next start",
+    "start": "next start -H 0.0.0.0 -p ${PORT:-8080}",
     "lint": "eslint",
     "cap:copy": "npx cap copy",
     "cap:sync": "npx cap sync",
