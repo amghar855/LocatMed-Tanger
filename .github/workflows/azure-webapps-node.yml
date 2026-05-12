@@ -29,6 +29,11 @@ jobs:
 
       - name: Build Next.js app
         run: npm run build
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          NEXTAUTH_URL: https://locatmed-g2bugfcjavb6hpee.francecentral-01.azurewebsites.net
+          AUTH_TRUST_HOST: true
 
       - name: Create deployment package
         run: |
